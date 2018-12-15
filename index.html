@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>jsPlumnb</title>
+    <style rel="stylesheet" type="text/css">
+
+        #diagramContainer {
+            padding: 20px;
+            width: 80%;
+            height: 200px;
+            border: 1px solid gray;
+        }
+
+        .item {
+            height: 80px;
+            width: 80px;
+            border: 1px solid blue;
+            float: left;
+        }
+
+    </style>
+</head>
+<body>
+<div id="diagramContainer">
+    <div id="item_left" class="item"></div>
+    <div id="item_right" class="item" style="margin-left:50px;"></div>
+</div>
+</body>
+<script src="./jsplumnb.min.js"></script>
+<script type="text/javascript">
+    jsPlumb.ready(function () {
+        let common = {
+            isSource: true,
+            isTarget: true,
+            // endpoint: 'Rectangle',
+            connector: ['Flowchart'], // Bezier: 贝塞尔曲线; Flowchart: 具有90度转折点的流程线; StateMachine: 状态机; Straight: 直线
+            // anchor: ['Left', 'Right']
+        }
+
+        jsPlumb.connect({
+            source: 'item_left',
+            target: 'item_right'
+        }, common)
+
+        jsPlumb.addEndpoint('item_left', {
+            anchors: ['Right']
+        }, common)
+
+        jsPlumb.addEndpoint('item_right', {
+            anchor: 'Left'
+        }, common)
+
+        jsPlumb.addEndpoint('item_right', {
+            anchor: 'Right'
+        }, common)
+
+        jsPlumb.bind('click', function (conn, originalEvent) {
+            console.log(conn, originalEvent)
+        })
+
+        jsPlumb.draggable('item_left')
+        jsPlumb.draggable('item_right')
+
+        jsPlumb.importDefaults({
+            PaintStyle : {
+                strokeWidth:13,
+                stroke: 'rgba(200,0,0,0.5)'
+            },
+            DragOptions : { cursor: "pointer" },
+            // Endpoints : [ [ "Dot", { radius:7 } ], [ "Dot", { radius:11 } ] ],
+            // EndpointStyles : [{ fill:"#225588" }, { fill:"#558822" }]
+        });
+    })
+</script>
+</html>
