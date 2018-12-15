@@ -21,16 +21,40 @@ let jsplumbPackage = {
         startNum: 0
     },
     addEndPoint (id, anchor, common) {
-        let connection = jsPlumb.addEndpoint(id, {
-            anchor: anchor,
-            connectorOverlays: [["PlainArrow", {width: 10, length: 30, location: 1}]]
-        }, common)
+        let connection
+        console.log(id)
+        if (anchor === 'Right' || anchor === 'RightMiddle') {
+            connection = jsPlumb.addEndpoint(id, {
+                anchor: anchor,
+                isSource: true,
+                connectorOverlays: [["PlainArrow", {width: 10, length: 30, location: 1}],
+                    ["Custom", {
+                        create: function (component) {
+                            return $("<img style='display: none' src='./icon_closure.png' />");
+                        },
+                        width: 20, length: 20, location: 0.5, id: id
+                    }]]
+            }, common)
+        }
+        if (anchor === 'Left' || anchor === 'LeftMiddle') {
+            connection = jsPlumb.addEndpoint(id, {
+                anchor: anchor,
+                isTarget: true,
+                connectorOverlays: [["PlainArrow", {width: 10, length: 30, location: 1}],
+                    ["Custom", {
+                        create: function (component) {
+                            return $("<img style='display: none' src='./icon_closure.png' />");
+                        },
+                        width: 20, length: 20, location: 0.5, id: id
+                    }]]
+            }, common)
+        }
         return connection
     },
     addEndPoints (id, point = [], common) {
         common = {
-            isSource: true,
-            isTarget: true,
+           /* isSource: true,
+            isTarget: true,*/
             // endpoint: ['Image', {src: './icon_close.png'}], 用于换图片
             ...common
         }
@@ -54,16 +78,23 @@ let jsplumbPackage = {
 // 用于移入显示、移出隐藏事情
     globalMove () {
         $('#' + this.defaultParams.parentId).on('mouseenter', this.defaultParams.child, function () {
-            console.log('11111', $(this).attr('id'))
-            let doms = jsPlumb.selectEndpoints({source: $(this).attr('id')})
-            doms.each(function (item) {
+            let domSource = jsPlumb.selectEndpoints({source: $(this).attr('id')})
+            let domTarget = jsPlumb.selectEndpoints({target: $(this).attr('id')})
+            domSource.each(function (item) {
+                $(item.canvas).addClass('jtk-hover')
+            })
+            domTarget.each(function (item) {
                 $(item.canvas).addClass('jtk-hover')
             })
             $(this).find('.close').removeClass('hide')
         })
         $('#' + this.defaultParams.parentId).on('mouseleave', this.defaultParams.child, function () {
-            let doms = jsPlumb.selectEndpoints({source: $(this).attr('id')})
-            doms.each(function (item) {
+            let domSource = jsPlumb.selectEndpoints({source: $(this).attr('id')})
+            let domTarget = jsPlumb.selectEndpoints({target: $(this).attr('id')})
+            domSource.each(function (item) {
+                $(item.canvas).removeClass('jtk-hover')
+            })
+            domTarget.each(function (item) {
                 $(item.canvas).removeClass('jtk-hover')
             })
             $(this).find('.close').addClass('hide')
@@ -71,7 +102,7 @@ let jsplumbPackage = {
     },
 // 用于jsplumb 绑定全局事情 connection =》 代表连接事情 beforeDrop =》 连接之前作出判断是否可连接，fase不连接、true连接
     jsPlumbBind () {
-        // let _this = this
+        let _this = this
         jsPlumb.bind('connection', function (info) {
             // console.log(info)
         })
@@ -85,9 +116,24 @@ let jsplumbPackage = {
         })
         jsPlumb.bind('click', function (coon, originalEvent) {
             console.log(coon)
-            // this.detach(coon)
-            console.log(jsPlumb)
             jsPlumb.deleteConnection(coon)
+        })
+
+        jsPlumb.bind('mouseover', function (coon) {
+            let idSign = (coon.id).split('_')[0]
+            if (idSign === 'con') {
+                $('#' + coon.canvas.nextElementSibling.id).show()
+            }
+            if (idSign === 'ep') {
+                console.log('点')
+            }
+        })
+        jsPlumb.bind('mouseout', function (coon) {
+            console.log(coon.canvas.nextElementSibling.id)
+            let idSign = (coon.id).split('_')[0]
+            if (idSign === 'con') {
+                $('#' + coon.canvas.nextElementSibling.id).hide()
+            }
         })
     },
     globalBind () {
@@ -203,7 +249,7 @@ let jsplumbPackage = {
                 target: elem.pageTargetId,
                 anchors: elem.anchors,
                 // detachable: false,
-                ..._this.dataCommon(elem.state)
+                ..._this.dataCommon(elem.state, elem.pageSourceId)
             })
         })
     },
@@ -212,20 +258,23 @@ let jsplumbPackage = {
         for (let i = 0; i < dom.length; i++) {
             $('#' + this.defaultParams.parentId).append(dom[i].node)
             // this.addEndPoints(dom[i].id, ['TopCenter', 'RightMiddle', 'BottomCenter', 'LeftMiddle'], this.setLineColor(this.common, i))
-            this.addEndPoints(dom[i].id, ['LeftMiddle'], this.setLineColor(this.common, this.getColorState(dom[i].id)))
+            this.addEndPoints(dom[i].id, ['RightMiddle', 'LeftMiddle'], this.setLineColor(this.common, this.getColorState(dom[i].id)))
             this.setDragg(dom[i].id)
         }
         this.init()
     },
-    dataCommon (state = 0) {
+    dataCommon (state = 0, id) {
         console.log(state)
         return {
-            isSource: true,
-            isTarget: true,
             connector: ['Flowchart'], // Bezier: 贝塞尔曲线  Flowchart: 具有90度转折点的流程线  StateMachine: 状态机  Straight: 直线
             paintStyle: {stroke: this.defaultParams.color[state], strokeWidth: 3},
             // endpointStyle: { fill: this.defaultParams.color[state]}, // 点的颜色
-            overlays: [["PlainArrow", {width: 10, length: 30, location: 1}]]
+            overlays: [["PlainArrow", {width: 10, length: 30, location: 1}], ["Custom", {
+                create: function (component) {
+                    return $("<img style='display: none' src='./icon_closure.png' />");
+                },
+                width: 20, length: 20, location: 0.5, id: id
+            }]]
         }
     },
     init () {
@@ -250,18 +299,18 @@ let jsplumbPackage = {
                 switch (name) {
                     case 'yellowingPersonnelNode':
                         newId = _this.createDom(ui, this, 'yellowingPersonnel', 'a')
-                        _this.addEndPoints(newId, ['TopCenter', 'RightMiddle', 'BottomCenter', 'LeftMiddle'], _this.common)
+                        _this.addEndPoints(newId, ['RightMiddle', 'LeftMiddle'], _this.common)
                         _this.setDragg(newId)
                         break;
                     case 'yellowishHotelNode':
                         newId = _this.createDom(ui, this, 'yellowishHotel', 'b')
-                        _this.addEndPoints(newId, ['TopCenter', 'RightMiddle', 'BottomCenter', 'LeftMiddle'], _this.setLineColor(_this.common, 1))
+                        _this.addEndPoints(newId, ['RightMiddle', 'LeftMiddle'], _this.setLineColor(_this.common, 1))
                         // _this.addEndPoints(newId, [['Left', 'Continuous']], _this.setLineColor(_this.common, 1))
                         _this.setDragg(newId)
                         break;
                     case 'realPopulationNode':
                         newId = _this.createDom(ui, this, 'realPopulation', 'c')
-                        _this.addEndPoints(newId, ['TopCenter', 'RightMiddle', 'BottomCenter', 'LeftMiddle'], _this.setLineColor(_this.common, 2))
+                        _this.addEndPoints(newId, ['RightMiddle', 'LeftMiddle'], _this.setLineColor(_this.common, 2))
                         _this.setDragg(newId)
                         break;
                 }
