@@ -22,7 +22,6 @@
         .main > .left {
             width: 400px;
             height: 100%;
-            border-right: 2px solid #ff2321;
         }
 
         .main > .left > .item {
@@ -36,14 +35,23 @@
             cursor: pointer;
         }
 
-        .main > .right {
+        .main .right-content {
             height: 100%;
             width: calc(100% - 400px - 80px);
-            border: 1px solid red;
-            position: relative;
+            border-left: 3px solid deepskyblue;
+            line-height: 30px;
         }
 
-        .main > .right > .item {
+        .main .right {
+            height: calc(100% - 30px);
+            width: 100%;
+            border: 1px solid red;
+            border-left: none;
+            position: relative;
+            overflow: scroll;
+        }
+
+        .main .right > .item {
             position: absolute;
             width: 100px;
             height: 60px;
@@ -75,43 +83,103 @@
             top: 6px;
             cursor: pointer;
         }
+
+        .menu {
+            position: absolute;
+            padding: 6px 10px;
+            background-color: #fff;
+            z-index: 999;
+            display: none;
+            cursor: default;
+            border: 1px solid #ddd;
+            border-radius: 1px;
+            min-width: 60px;
+        }
+
+        .menu > div {
+            font-size: 14px;
+            color: #333;
+            line-height: 30px;
+        }
     </style>
 </head>
 <body class="main">
-<div id="model" data-id="" class="hide" style="position: absolute;top: 100px;left: 400px;z-index: 10;background-color: #409eff;width: 400px;height: 100px;padding: 20px 40px;">
+<div id="model" data-id="" class="hide"
+     style="position: absolute;top: 100px;left: 400px;z-index: 10;background-color: #409eff;width: 400px;height: 100px;padding: 20px 40px;">
     <div>
-        <label><input name="Fruit" type="radio" value="a" />人 </label>
-        <label><input name="Fruit" type="radio" value="b" />车 </label>
-        <label><input name="Fruit" type="radio" value="c" />mac</label>
+        <label><input name="Fruit" type="radio" value="a"/>人 </label>
+        <label><input name="Fruit" type="radio" value="b"/>车 </label>
+        <label><input name="Fruit" type="radio" value="c"/>mac</label>
     </div>
     <div style="position: absolute;right: 40px;bottom: 20px;">
         <div onclick="getVal()">确定</div>
     </div>
 </div>
 <div id="left" class="left">
-    <div id="yellowingPersonnelNode" class="item">
+    <!--人员-->
+    <div v-show="menuName === 'person' ? true : false" id="realPopulationNode" class="item">
+        <div>实有人口</div>
+    </div>
+    <div v-show="menuName === 'person' ? true : false" id="yellowingPersonnelNode" class="item">
         <div>疑似涉黄人员</div>
     </div>
-    <div id="yellowishHotelNode" class="item">
-        <div>疑似涉黄旅馆</div>
+    <!--车辆-->
+    <div v-show="menuName === 'vehicle' ? true : false" id="regionalWanderingNode" class="item">
+        <div>区域徘徊</div>
     </div>
-    <div id="realPopulationNode" class="item">
-        <div>实有人口</div>
+    <div v-show="menuName === 'vehicle' ? true : false" id="continuousViolationNode" class="item">
+        <div>连续违章</div>
+    </div>
+    <div v-show="menuName === 'vehicle' ? true : false" id="accompanyingVehicleNode" class="item">
+        <div>伴随车辆</div>
+    </div>
+    <div v-show="menuName === 'vehicle' ? true : false" id="dayTimeHideNightNode" class="item">
+        <div>昼伏夜出</div>
+    </div>
+    <!--基础-->
+    <div v-show="menuName === 'basics' ? true : false" id="toCutOffNode" class="item">
+        <div>剪除</div>
+    </div>
+    <div v-show="menuName === 'basics' ? true : false" id="intersectionNode" class="item">
+        <div>交集</div>
+    </div>
+    <div v-show="menuName === 'basics' ? true : false" id="unionNode" class="item">
+        <div>并集</div>
+    </div>
+    <!--目标关联-->
+    <div v-show="menuName === 'association' ? true : false" id="idMappingNode" class="item">
+        <div>IDMAPPING</div>
     </div>
     <div onclick="saves()">保存</div>
     <div onclick="loads()">加载</div>
-    <div onclick="resetJsplumb()">重画</div>
+    <div onclick="saveImg()">保存图片</div>
+    <img id="img" src=""/>
 </div>
-<div id="right" class="right">
-    <div id="start-a-1" status="" class="item start" style="left: 20px;top: 200px;">
-        <div>开始</div>
-        <div onclick="add()" style="background: url(icon_closed02.png) no-repeat center center;width: 20px;height: 20px;margin-left: 20px;"></div>
+<div id="flowChart" class="right-content">
+    <div style="display: flex;justify-content: space-evenly;">
+        <li onclick="createFlowChart('right')">流程图1</li>
+        <li onclick="createFlowChart('right-1')">流程图2</li>
+    </div>
+    <div id="right" class="right">
+        <div id="start-a-1" status="" class="item start" style="left: 20px;top: 200px;">
+            <div>开始</div>
+            <div onclick="add()"
+                 style="background: url(icon_closed02.png) no-repeat center center;width: 20px;height: 20px;margin-left: 20px;"></div>
+        </div>
+    </div>
+    <div id="right-1" class="right">
+        <div id="start-a-2" status="" class="item start" style="left: 20px;top: 200px;">
+            <div>开始</div>
+            <div onclick="add()"
+                 style="background: url(icon_closed02.png) no-repeat center center;width: 20px;height: 20px;margin-left: 20px;"></div>
+        </div>
     </div>
 </div>
 
 <div id="start" status="" class="item start hide" style="left: 20px;top: 20px;">
     <div>开始</div>
-    <div onclick="add()" style="background: url(icon_closed02.png) no-repeat center center;width: 20px;height: 20px;margin-left: 20px;"></div>
+    <div onclick="add()"
+         style="background: url(icon_closed02.png) no-repeat center center;width: 20px;height: 20px;margin-left: 20px;"></div>
 </div>
 
 <div id="yellowingPersonnel" class="item hide">
@@ -131,20 +199,55 @@
     <p>椭圆形</p>
 </div>
 
+<div id="menu" data-id="" class="menu">
+    <div id="del">删除</div>
+    <div>重命名</div>
+</div>
 </body>
 <script src="jquery-ui-1.12.1.custom/external/jquery/jquery.js"></script>
 <script src="jquery-ui-1.12.1.custom/jquery-ui.min.js"></script>
 <script src="jsplumb.js"></script>
+<script src="./html2canvas.js"></script>
+
+<!-- Required to convert named colors to RGB -->
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/canvg/1.4/rgbcolor.min.js"></script>-->
+<!-- Optional if you want blur -->
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/stackblur-canvas/1.4.1/stackblur.min.js"></script>-->
+<!-- Main canvg code -->
+<script src="https://cdn.jsdelivr.net/npm/canvg/dist/browser/canvg.min.js"></script>
 
 <script src="./jsplumb-package.js"></script>
 <script type="application/javascript">
-    jsplumbPackage.init()
+    // let jsplumbPackage = new JsplumbPackage()
+    // jsplumbPackage.init()
+
+    let jsplumbPackageIds = {}
+    let id = ''
+    createFlowChart('right')
+    function createFlowChart (newId) {
+        id = newId
+        let dom = $('#flowChart').children()
+        console.log(dom)
+        dom.each(function (index, item) {
+            if (index > 0) {
+                $(this).hide()
+            }
+        })
+        $('#' +newId).show()
+        showFlowChart()
+    }
+
+    function showFlowChart () {
+        jsplumbPackageIds[id] = new JsplumbPackage(id)
+        jsplumbPackageIds[id].init()
+    }
+
     function saves () {
-        jsplumbPackage.saveJsplumb()
+        jsplumbPackageIds[id].saveJsplumb()
     }
 
     function loads () {
-        jsplumbPackage.loadJsplumb()
+        jsplumbPackageIds[id].loadJsplumb()
     }
 
     function add () {
@@ -152,7 +255,7 @@
             let newId = jsplumbPackage.createDom('', '', 'start')
             // jsplumbPackage.addEndPoints(jsplumbPackage.defaultParams.connection, newId, ['TopCenter', 'RightMiddle', 'BottomCenter'], jsplumbPackage.common)
         } else {
-         alert('该元素只允许添加' + jsplumbPackage.defaultParams.startMaxNum + '个')
+            alert('该元素只允许添加' + jsplumbPackage.defaultParams.startMaxNum + '个')
         }
     }
 
@@ -160,7 +263,7 @@
         let getVal = $('input[name="Fruit"]:checked').val()
         console.log(getVal)
         let id = $('#model').data('id')
-       $($('#' + id).find('div')[0]).text(getVal)
+        $($('#' + id).find('div')[0]).text(getVal)
         $('#model').addClass('hide')
         let val = {
             a: 0,
@@ -190,7 +293,128 @@
             console.log(aa, aa.get())
         })*/
     }
+
     bindDB()
+
+    function saveImg () {
+        // saveSvgAsPng(document.getElementById("right"), "diagram.png");
+        /* html2canvas(document.getElementById('right'), {scale: 0.1}).then(canvas => {
+             console.log(canvas)
+             $('#img').attr('src', canvas.toDataURL())
+         });*/
+        jsplumbPackageIds[id].createImg()
+        // showQRCode()
+        // jsplumbPackage.createImg()
+    }
+
+    // 截图
+    function showQRCode () {
+        scrollTo(0, 0);
+        if (typeof html2canvas !== 'undefined') {
+            //以下是对svg的处理
+            var nodesToRecover = [];
+            var nodesToRemove = [];
+            let dom = $('#right').clone()
+            console.log(dom)
+            $(dom).attr('id', 'right_clone')
+            console.log($('#right'), $('#right')[0].scrollHeight)
+            $(dom).css({
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: $('#right')[0].scrollWidth,
+                height: $('#right')[0].scrollHeight
+            })
+            var svgElem = $(dom).find('svg')
+            // var svgElem = $("#right").find('svg');//divReport为需要截取成图片的dom的id
+            svgElem.each(function (index, node) {
+                var parentNode = node.parentNode;
+                var svg = node.outerHTML.trim();
+
+                var canvas = document.createElement('canvas');
+                canvg(canvas, svg);
+                if (node.style.position) {
+                    canvas.style.position += node.style.position;
+                    canvas.style.left += node.style.left;
+                    canvas.style.top += node.style.top;
+                }
+
+                nodesToRecover.push({
+                    parent: parentNode,
+                    child: node
+                });
+                parentNode.removeChild(node);
+
+                nodesToRemove.push({
+                    parent: parentNode,
+                    child: canvas
+                });
+
+                parentNode.appendChild(canvas);
+            });
+            console.log(dom)
+            $('#right').append(dom)
+            // document.getElementById('right')
+            html2canvas(document.getElementById('right_clone'), {
+                scale: 1
+            }).then(canvas => {
+                console.log(canvas)
+                // $('#img').attr('src', canvas.toDataURL())
+                resizeImage(canvas.toDataURL(), function (src) {
+                    $('#img').attr('src', src)
+                })
+                $('#right_clone').remove()
+            })
+        }
+    }
+
+    function resizeImage (src, callback, w, h) {
+        var canvas = document.createElement("canvas"),
+            ctx = canvas.getContext("2d"),
+            im = new Image();
+        w = w || 0,
+            h = h || 0;
+        im.onload = function () {
+            //为传入缩放尺寸用原尺寸
+            !w && (w = this.width);
+            !h && (h = this.height);
+            //以长宽最大值作为最终生成图片的依据
+            if (w !== this.width || h !== this.height) {
+                var ratio;
+                if (w > h) {
+                    ratio = this.width / w;
+                    h = this.height / ratio;
+                } else if (w === h) {
+                    if (this.width > this.height) {
+                        ratio = this.width / w;
+                        h = this.height / ratio;
+                    } else {
+                        ratio = this.height / h;
+                        w = this.width / ratio;
+                    }
+                } else {
+                    ratio = this.height / h;
+                    w = this.width / ratio;
+                }
+            }
+            //以传入的长宽作为最终生成图片的尺寸
+            if (w > h) {
+                var offset = (w - h) / 2;
+                canvas.width = canvas.height = w;
+                ctx.drawImage(im, 0, offset, w, h);
+            } else if (w < h) {
+                var offset = (h - w) / 2;
+                canvas.width = canvas.height = h;
+                ctx.drawImage(im, offset, 0, w, h);
+            } else {
+                canvas.width = canvas.height = h;
+                ctx.drawImage(im, 0, 0, w, h);
+            }
+            callback(canvas.toDataURL("image/png"));
+        }
+        im.src = src;
+    }
+
 </script>
 
 <!-- 手动连接时 -->
